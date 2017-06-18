@@ -1,37 +1,37 @@
+
 pareja(marsellus, mia).
 pareja(pumkin,honeyBunny).
-%--------2-------------
 pareja(bernardo,bianca).
 pareja(bernardo,charo).
-%-----------------------
+
+%------1--------
+saleCon(Quien,Cual):- pareja(Quien,Cual).
+saleCon(Quien,Cual):- pareja(Cual,Quien).
+%--------------3-----------
 trabajaPara(marsellus, vincent).
 trabajaPara(marsellus, jules).
 trabajaPara(marsellus, winston).
-%--------------3-----------
+
 trabajaPara(Quien,bernardo):-
 	trabajaPara(marsellus,Quien),
 	Quien \= jules.
 trabajaPara(Quien,george):-
-	pareja(bernardo,Quien).
-%------1--------
-saleCon(Quien,Cual):- pareja(Quien,Cual).
-saleCon(Quien,Cual):- pareja(Cual,Quien).
+	saleCon(bernardo,Quien).
 %------4-------
-conQuienSale(Personaje,Personajes):-
+conQuienesSale(Personaje,Personajes):-
 	saleCon(Personaje,_),
 	findall(OtroPersonaje, saleCon(Personaje,OtroPersonaje),Personajes).
 
 esFiel(Personaje):-
-	conQuienSale(Personaje,Personajes),
+	conQuienesSale(Personaje,Personajes),
 	length(Personajes,Cantidad),
 	Cantidad < 2.	
 %-------5-----
-acataOrden(Empleador,Empleado):- trabajaPara(Empleador,Empleado).
+%acataOrden es recursiva
+acataOrden(Empleador,Empleado):- trabajaPara(Empleador,Empleado). %caso base
 acataOrden(Empleador,Empleado):-
 		trabajaPara(OtroEmpleador,Empleado),
-		acataOrden(Empleador,OtroEmpleador).
-acataOrden( , ).
-
+		acataOrden(Empleador,OtroEmpleador). %caso recursivo
 %--------------------------------------------------------------2da entrega---------------------------------------------------------
 personaje(pumkin,     ladron([estacionesDeServicio, licorerias])).
 personaje(honeyBunny, ladron([licorerias, estacionesDeServicio])).
