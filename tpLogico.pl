@@ -59,45 +59,73 @@ amigo(vincent, jules).
 amigo(jules, jimmie).
 amigo(vincent, elVendedor).
 %--------------1-------------
-esPeligroso(Personaje):-
-	personaje(Personaje,mafioso(maton)).
-esPeligroso(Personaje):-
-	personaje(Personaje,ladron(Lista)),
-	member(licorerias,Lista).
-esPeligroso(Personaje):-
-	trabajaPara(Personaje,Empleado),
-	esPeligroso(Empleado).
-%-------------2--------------
-%asi anda 
-sanCayetano(UnPersonaje):-
-			amigoOEmpleado(UnPersonaje,OtroPersonaje),
-			forall(amigoOEmpleado(UnPersonaje,OtroPersonaje),tarea(UnPersonaje,OtroPersonaje)).
 
-tarea(UnPersonaje,OtroPersonaje):-encargo(UnPersonaje,OtroPersonaje,ayudar(_)).
-tarea(UnPersonaje,OtroPersonaje):-encargo(UnPersonaje,OtroPersonaje,cuidar(_)).
-tarea(UnPersonaje,OtroPersonaje):-encargo(UnPersonaje,OtroPersonaje,buscar(_,_)).
+esPeligroso(Personaje):-
+	personaje(Personaje,Ocupacion),
+	ocupacionPeligrosa(Ocupacion).
 	
-amigoOEmpleado(UnPersonaje,OtroPersonaje):- amigo(OtroPersonaje,UnPersonaje).
-amigoOEmpleado(UnPersonaje,OtroPersonaje):- trabajaPara(OtroPersonaje,UnPersonaje).
+esPeligroso(Personaje):-
+	trabajaPara(Empleador,Personaje),
+	esPeligroso(Empleador).
+	
+ocupacionPeligrosa(mafioso(maton)).
+
+ocupacionPeligrosa(ladron(Lista)):-
+	member(licorerias,Lista).
+
+%-------------2--------------
+
+sanCayetano(UnPersonaje):-
+	esCercano(UnPersonaje,_),
+	forall(esCercano(UnPersonaje,OtroPersonaje),encargo(UnPersonaje,OtroPersonaje,_)).
+
+esCercano(UnPersonaje,PersonajeCercano):- sonAmigos(PersonajeCercano,UnPersonaje).
+esCercano(UnPersonaje,PersonajeCercano):- trabajaPara(PersonajeCercano,UnPersonaje).
+
+sonAmigos(Personaje,OtroPersonaje):-amigo(Personaje,OtroPersonaje).
+sonAmigos(Personaje,OtroPersonaje):-amigo(OtroPersonaje,Personaje).
+
 %---------------------3----------------
-nivelDeRespeto(UnPersonaje,NivelDeRespeto):-
-	personaje(UnPersonaje,     actriz(Lista)),
-	length(Lista,Cantidad),
-	NivelDeRespeto is Cantidad / 10.
-nivelDeRespeto(UnPersonaje,10):-
-	personaje(UnPersonaje,  mafioso(Profesion)),
-	Profesion = resuelveProblemas.
-nivelDeRespeto(UnPersonaje,20):-
-	personaje(UnPersonaje,  mafioso(Profesion)),
-	Profesion = capo.
+
 nivelDeRespeto(vincent,15).
 
+nivelDeRespeto(Personaje,Nivel):-
+	personaje(Personaje,Ocupacion),
+	niveldeOcupacion(Ocupacion,Nivel).
 	
+niveldeOcupacion(actriz(Lista),Nivel):-
+	length(Lista,Largo),
+	Nivel is Largo/10.
 	
+niveldeOcupacion(mafioso(resuelveProblemas),10).
+
+niveldeOcupacion(mafioso(capo),20).
+
+%--------------------4-------------------
+
+respetabilidad(Respetables,NoRespetables):-
+	findall(PersonajeRespetable,esRespetable(PersonajeRespetable),ListaRespetables),
+	findall(Personaje,personaje(Personaje,_),ListaPersonajesTotales),
+	length(ListaRespetables,Respetables),
+	length(ListaPersonajesTotales,PersonajesTotales),
+	NoRespetables is PersonajesTotales-Respetables.
+
+esRespetable(Personaje):-
+	nivelDeRespeto(Personaje,Nivel),
+	Nivel > 9.
 	
-	
+%------------------5-------------------
 
+masAtareado(Personaje):-
+	cantidadEncargos(Personaje,_),
+	forall(cantidadEncargos(Personaje,Cant),mayorCantidadDeEncargos(Cant)).
 
+mayorCantidadDeEncargos(Cantidad):-
+	findall(Cant,cantidadEncargos(_,Cant),Lista),
+	max_list(Lista,Cantidad).
 
-
+cantidadEncargos(Personaje,Cantidad):-
+	encargo(_,Personaje,_),
+	findall(Encargo,encargo(_,Personaje,Encargo),ListaDeEncargos),
+	length(ListaDeEncargos,Cantidad).
 
